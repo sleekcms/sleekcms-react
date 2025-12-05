@@ -1,0 +1,35 @@
+{
+  "name": "@sleekcms/react",
+  "version": "0.1.0",
+  "description": "React bindings for @sleekcms/client",
+  "main": "index.cjs",
+  "module": "index.mjs",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs",
+      "require": "./index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.tsx --dts --format esm,cjs && npm run copy-files",
+    "copy-files": "cp README.md package.json dist/",
+    "clean": "rimraf dist || true"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@sleekcms/client": "^0.1.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}
