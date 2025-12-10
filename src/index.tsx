@@ -13,7 +13,7 @@ import {
   type ClientOptions,
   type SleekClient as AsyncClient,
   type SleekSyncClient,
-} from "@sleekcms/client";
+} from "sleekcms-client";
 
 export type SleekClient = AsyncClient | SleekSyncClient;
 

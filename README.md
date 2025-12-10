@@ -1,11 +1,11 @@
-# @sleekcms/react
+# sleekcms-react
 
 React bindings for [SleekCMS](https://sleekcms.com) - A headless CMS that makes content management simple and developer-friendly.
 
 ## Installation
 
 ```bash
-npm install @sleekcms/react
+npm install sleekcms-react
 ```
 
 ## Quick Start
@@ -13,7 +13,7 @@ npm install @sleekcms/react
 ### 1. Wrap Your App with SleekCMSProvider
 
 ```tsx
-import { SleekCMSProvider } from '@sleekcms/react';
+import { SleekCMSProvider } from 'sleekcms-react';
 
 function App() {
   return (
@@ -27,7 +27,7 @@ function App() {
 ### 2. Fetch Content with Hooks
 
 ```tsx
-import { useCmsContent } from '@sleekcms/react';
+import { useCmsContent } from 'sleekcms-react';
 
 function BlogPost() {
   const { data, isLoading, error } = useCmsContent('blog/my-first-post');
@@ -157,7 +157,7 @@ Get structured data lists (categories, tags, etc.).
 Get any content from your CMS by path.
 
 ```tsx
-import { useCmsContent } from '@sleekcms/react';
+import { useCmsContent } from 'sleekcms-react';
 
 function HomePage() {
   const { data, isLoading } = useCmsContent('homepage');
@@ -178,7 +178,7 @@ function HomePage() {
 Query pages with filters.
 
 ```tsx
-import { useCmsPages } from '@sleekcms/react';
+import { useCmsPages } from 'sleekcms-react';
 
 function BlogList() {
   const { data, isLoading } = useCmsPages('blog', 'status=published&sort=-date');
@@ -203,7 +203,7 @@ function BlogList() {
 Get all images from your media library.
 
 ```tsx
-import { useCmsImages } from '@sleekcms/react';
+import { useCmsImages } from 'sleekcms-react';
 
 function Gallery() {
   const { data: images, isLoading } = useCmsImages();
@@ -225,7 +225,7 @@ function Gallery() {
 Get a specific image by name.
 
 ```tsx
-import { useCmsImage } from '@sleekcms/react';
+import { useCmsImage } from 'sleekcms-react';
 
 function Hero() {
   const { data: image, isLoading } = useCmsImage('hero-background.jpg');
@@ -248,7 +248,7 @@ function Hero() {
 Get structured data lists (like categories, tags, etc.).
 
 ```tsx
-import { useCmsList } from '@sleekcms/react';
+import { useCmsList } from 'sleekcms-react';
 
 function Categories() {
   const { data: categories, isLoading } = useCmsList('categories');
@@ -270,7 +270,7 @@ function Categories() {
 Control when data is fetched using the `enabled` option.
 
 ```tsx
-import { useCmsContent } from '@sleekcms/react';
+import { useCmsContent } from 'sleekcms-react';
 
 function UserProfile({ userId }) {
   const [shouldFetch, setShouldFetch] = useState(false);
@@ -297,7 +297,7 @@ function UserProfile({ userId }) {
 Trigger a manual refetch of data.
 
 ```tsx
-import { useCmsContent } from '@sleekcms/react';
+import { useCmsContent } from 'sleekcms-react';
 
 function RefreshableContent() {
   const { data, isLoading, refetch } = useCmsContent('live-data');
@@ -322,7 +322,7 @@ function RefreshableContent() {
 Add type safety to your content.
 
 ```tsx
-import { useCmsContent } from '@sleekcms/react';
+import { useCmsContent } from 'sleekcms-react';
 
 interface BlogPost {
   id: string;
@@ -352,7 +352,7 @@ function TypedBlogPost() {
 With sync mode, content is prefetched once and always available synchronously:
 
 ```tsx
-import { SleekCMSProvider, useCmsContent } from '@sleekcms/react';
+import { SleekCMSProvider, useCmsContent } from 'sleekcms-react';
 
 function App() {
   return (
@@ -379,7 +379,7 @@ function HomePage() {
 
 ```tsx
 // app/layout.tsx
-import { SleekCMSProvider } from '@sleekcms/react';
+import { SleekCMSProvider } from 'sleekcms-react';
 
 export default function RootLayout({ children }) {
   return (
@@ -396,7 +396,7 @@ export default function RootLayout({ children }) {
 // app/page.tsx
 'use client';
 
-import { useCmsContent } from '@sleekcms/react';
+import { useCmsContent } from 'sleekcms-react';
 
 export default function Home() {
   const { data, isLoading } = useCmsContent('homepage');
@@ -413,7 +413,7 @@ export default function Home() {
 // app/layout.tsx
 'use client';
 
-import { SleekCMSProvider } from '@sleekcms/react';
+import { SleekCMSProvider } from 'sleekcms-react';
 
 export default function RootLayout({ children }) {
   return (
@@ -433,7 +433,7 @@ export default function RootLayout({ children }) {
 // app/page.tsx
 'use client';
 
-import { useCmsContent } from '@sleekcms/react';
+import { useCmsContent } from 'sleekcms-react';
 
 export default function Home() {
   const { data } = useCmsContent('homepage');
@@ -446,7 +446,7 @@ export default function Home() {
 ## Error Handling
 
 ```tsx
-import { useCmsContent } from '@sleekcms/react';
+import { useCmsContent } from 'sleekcms-react';
 
 function SafeContent() {
   const { data, error, isLoading, status } = useCmsContent('my-content');
@@ -467,8 +467,8 @@ function SafeContent() {
 For more control, create a client instance separately.
 
 ```tsx
-import { createClient } from '@sleekcms/client';
-import { SleekCMSProvider } from '@sleekcms/react';
+import { createClient } from 'sleekcms-client';
+import { SleekCMSProvider } from 'sleekcms-react';
 
 const sleekClient = createClient({
   siteToken: 'your-site-token',
