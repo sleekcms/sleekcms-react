@@ -14,10 +14,9 @@
   },
   "scripts": {
     "build": "tsup src/index.tsx --dts --format esm,cjs && npm run copy-files",
-    "copy-files": "cp README.md package.json dist/",
+    "copy-files": "cp README.md package.json .npmrc dist/",
     "clean": "rimraf dist || true",
-    "test": "vitest run",
-    "prepublishOnly": "npm run build"
+    "test": "vitest run"
   },
   "files": [
     "*.js",
