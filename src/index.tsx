@@ -1,207 +1,83 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  ReactNode
-} from "react";
-import {
-  createClient,
-  createSyncClient,
-  type ClientOptions,
-  type SleekClient as AsyncClient,
-  type SleekSyncClient,
-} from "@sleekcms/client";
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { createAsyncClient, SleekSiteContent, Page, Image, List, Entry } from "@sleekcms/client";
 
-export type SleekClient = AsyncClient | SleekSyncClient;
+type AsyncClient = ReturnType<typeof createAsyncClient>;
+type Pages = SleekSiteContent["pages"];
 
-type Status = "idle" | "loading" | "success" | "error";
-
-export interface UseSleekCmsResult<T> {
-  data: T | undefined;
-  error: unknown;
-  isLoading: boolean;
-  status: Status;
-  refetch: () => Promise<void>;
-}
-
-export interface SleekCMSProviderProps extends Partial<ClientOptions> {
-  client?: SleekClient;
-  sync?: boolean;
+interface ProviderProps {
+  siteToken: string;
+  env?: string;
+  cdn?: boolean;
+  lang?: string;
   children: ReactNode;
 }
 
-const SleekCmsContext = createContext<SleekClient | null>(null);
-
-export function SleekCMSProvider({
-  client,
-  siteToken,
-  env,
-  cache,
-  mock,
-  sync,
-  children
-}: SleekCMSProviderProps) {
-  const [syncClient, setSyncClient] = useState<SleekSyncClient | null>(null);
-  const [isInitializing, setIsInitializing] = useState(sync || false);
-
-  useEffect(() => {
-    if (sync && !client && siteToken) {
-      setIsInitializing(true);
-      createSyncClient({ siteToken, env, cache, mock })
-        .then((c) => {
-          setSyncClient(c);
-          setIsInitializing(false);
-        })
-        .catch((err) => {
-          console.error("[SleekCMSProvider] Failed to create sync client:", err);
-          setIsInitializing(false);
-        });
-    }
-  }, [sync, client, siteToken, env, cache, mock]);
-
-  const value = useMemo(() => {
-    if (client) return client;
-    if (sync && syncClient) return syncClient;
-    if (sync && isInitializing) return null;
-    if (!siteToken) {
-      throw new Error(
-        "[SleekCMSProvider] Either `client` or `siteToken` must be provided."
-      );
-    }
-    return createClient({ siteToken, env, cache, mock });
-  }, [client, sync, syncClient, isInitializing, siteToken, env, cache, mock]);
-
-  if (sync && isInitializing) {
-    return null;
-  }
-
-  return (
-    <SleekCmsContext.Provider value={value}>
-      {children}
-    </SleekCmsContext.Provider>
-  );
+interface Result<T> {
+  data: T | undefined;
+  error: unknown;
+  loading: boolean;
+  refetch: () => Promise<void>;
 }
 
-function useSleekClientFromContext(): SleekClient {
-  const ctx = useContext(SleekCmsContext);
-  if (!ctx) {
-    throw new Error(
-      "[useSleekCms] Missing SleekCMSProvider. Wrap your app with <SleekCMSProvider>."
-    );
-  }
-  return ctx;
+const Context = createContext<AsyncClient | null>(null);
+
+function useClient(): AsyncClient {
+  const client = useContext(Context);
+  if (!client) throw new Error("Wrap your app with <SleekCMSProvider>");
+  return client;
 }
 
-function useAsyncQuery<T>(
-  fetcher: () => Promise<T>,
-  enabled: boolean
-): UseSleekCmsResult<T> {
-  const [data, setData] = useState<T | undefined>(undefined);
-  const [error, setError] = useState<unknown>(undefined);
-  const [status, setStatus] = useState<Status>("idle");
+function useFetch<T>(fetcher: (client: AsyncClient) => Promise<T>, deps: unknown[]): Result<T> {
+  const client = useClient();
+  const [data, setData] = useState<T>();
+  const [error, setError] = useState<unknown>();
+  const [loading, setLoading] = useState(false);
 
   const refetch = useCallback(async () => {
-    if (!enabled) return;
-    setStatus("loading");
-    setError(undefined);
+    setLoading(true);
     try {
-      const result = await fetcher();
-      setData(result);
-      setStatus("success");
-    } catch (err) {
-      setError(err);
-      setStatus("error");
+      setData(await fetcher(client));
+    } catch (e) {
+      setError(e);
+    } finally {
+      setLoading(false);
     }
-  }, [enabled, fetcher]);
+  }, [client, ...deps]);
 
-  useEffect(() => {
-    if (!enabled) return;
-    refetch();
-  }, [enabled, refetch]);
+  useEffect(() => { refetch(); }, [refetch]);
 
-  return {
-    data,
-    error,
-    isLoading: status === "loading",
-    status,
-    refetch
-  };
+  return { data, error, loading, refetch };
 }
 
-export function useCmsContent<T = any>(
-  query?: string,
-  options?: { enabled?: boolean }
-): UseSleekCmsResult<T> {
-  const client = useSleekClientFromContext();
-  const enabled = options?.enabled ?? true;
-
-  const fetcher = useCallback(async (): Promise<T> => {
-    const result = client.getContent<T>(query);
-    return result instanceof Promise ? await result : result;
-  }, [client, query]);
-
-  return useAsyncQuery<T>(fetcher, enabled);
+export function SleekCMSProvider({ siteToken, env, cdn, lang, children }: ProviderProps) {
+  const [client] = useState(() => createAsyncClient({ siteToken, env, cdn, lang }));
+  return <Context.Provider value={client}>{children}</Context.Provider>;
 }
 
-export function useCmsPages<T = any>(
-  path: string,
-  query?: string,
-  options?: { enabled?: boolean }
-): UseSleekCmsResult<T> {
-  const client = useSleekClientFromContext();
-  const enabled = options?.enabled ?? true;
-
-  const fetcher = useCallback(async (): Promise<T> => {
-    const result = client.findPages<T>(path, query);
-    return result instanceof Promise ? await result : result;
-  }, [client, path, query]);
-
-  return useAsyncQuery<T>(fetcher, enabled);
+export function useContent(query?: string): Result<SleekSiteContent> {
+  return useFetch(client => client.getContent(query), [query]);
 }
 
-export function useCmsImages<T = any>(
-  options?: { enabled?: boolean }
-): UseSleekCmsResult<T> {
-  const client = useSleekClientFromContext();
-  const enabled = options?.enabled ?? true;
-
-  const fetcher = useCallback(async (): Promise<T> => {
-    const result = client.getImages();
-    return (result instanceof Promise ? await result : result) as T;
-  }, [client]);
-
-  return useAsyncQuery<T>(fetcher, enabled);
+export function usePages(path: string): Result<Pages> {
+  return useFetch(client => client.getPages(path), [path]);
 }
 
-export function useCmsImage<T = any>(
-  name: string,
-  options?: { enabled?: boolean }
-): UseSleekCmsResult<T> {
-  const client = useSleekClientFromContext();
-  const enabled = options?.enabled ?? true;
-
-  const fetcher = useCallback(async (): Promise<T> => {
-    const result = client.getImage(name);
-    return (result instanceof Promise ? await result : result) as T;
-  }, [client, name]);
-
-  return useAsyncQuery<T>(fetcher, enabled);
+export function usePage(path: string): Result<Page | null> {
+  return useFetch(client => client.getPage(path), [path]);
 }
 
-export function useCmsList<T = any>(
-  name: string,
-  options?: { enabled?: boolean }
-): UseSleekCmsResult<T> {
-  const client = useSleekClientFromContext();
-  const enabled = options?.enabled ?? true;
+export function useSlugs(path: string): Result<string[]> {
+  return useFetch(client => client.getSlugs(path), [path]);
+}
 
-  const fetcher = useCallback(async (): Promise<T> => {
-    const result = client.getList<T>(name);
-    return (result instanceof Promise ? await result : result) as T;
-  }, [client, name]);
+export function useImage(name: string): Result<Image | null> {
+  return useFetch(client => client.getImage(name), [name]);
+}
 
-  return useAsyncQuery<T>(fetcher, enabled);
+export function useList(name: string): Result<List | null> {
+  return useFetch(client => client.getList(name), [name]);
+}
+
+export function useEntry(handle: string): Result<Entry | null> {
+  return useFetch(client => client.getEntry(handle), [handle]);
 }
