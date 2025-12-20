@@ -1,6 +1,6 @@
 # @sleekcms/react
 
-React bindings for [SleekCMS](https://sleekcms.com) using `@sleekcms/client`.
+React hooks for fetching content from [SleekCMS](https://sleekcms.com).
 
 ## Installation
 
@@ -8,81 +8,91 @@ React bindings for [SleekCMS](https://sleekcms.com) using `@sleekcms/client`.
 npm install @sleekcms/react
 ```
 
+Requires React 18+.
+
 ## Quick Start
 
-### 1. Wrap Your App
+Wrap your app with the provider:
 
 ```tsx
 import { SleekCMSProvider } from '@sleekcms/react';
 
-function App() {
-  return (
-    <SleekCMSProvider siteToken="your-site-token">
-      <YourApp />
-    </SleekCMSProvider>
-  );
+<SleekCMSProvider siteToken="your-site-token">
+  <App />
+</SleekCMSProvider>
+```
+
+Fetch content with hooks:
+
+```tsx
+import { usePage } from '@sleekcms/react';
+
+function About() {
+  const { data, loading, error } = usePage('/about');
+  if (loading) return <p>Loading...</p>;
+  return <h1>{data?.title}</h1>;
 }
 ```
 
-### 2. Fetch Content
+## Sync vs Async Client
+
+SleekCMS offers two client types in `@sleekcms/client`:
+
+| Client | Use Case |
+|--------|----------|
+| **Sync** (`createSyncClient`) | Server-side rendering, build-time. Preload content, then access synchronously. |
+| **Async** (`createAsyncClient`) | Client-side React apps. Fetches on demand, returns Promises. |
+
+**This package (`@sleekcms/react`) uses the async client internally.** The hooks handle fetching, loading states, and refetching automatically—ideal for React SPAs and client components.
+
+For SSR/SSG (Next.js, Remix), use `@sleekcms/client` directly with the sync client to fetch content at build time or on the server.
+
+## Hooks
+
+All hooks return `{ data, loading, error, refetch }`.
+
+### useContent
+
+Fetch the full site content, optionally filtered with a [JMESPath](https://jmespath.org/) query:
 
 ```tsx
-import { useContent } from '@sleekcms/react';
-
-function BlogPosts() {
-  const { data, isLoading, error } = useContent(client => client.getPages('/blog'));
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading content</div>;
-
-  return data?.map(post => <article key={post._path}><h2>{post.title}</h2></article>);
-}
+const { data } = useContent();           // full content
+const { data } = useContent('config');   // just config
 ```
 
-## API
-
-### `<SleekCMSProvider>`
-
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `siteToken` | `string` | Yes | Your SleekCMS site token |
-| `env` | `string` | No | Environment/alias name |
-| `cdn` | `boolean` | No | Use CDN-friendly URLs |
-| `lang` | `string` | No | Language code (e.g., 'en', 'es') |
-
-### `useContent<T>(fetcher)`
-
-Generic hook that receives the async client and returns content.
+### usePage / usePages
 
 ```tsx
-// Get a single page
-const { data } = useContent(c => c.getPage('/about'));
-
-// Get pages by path
-const { data } = useContent(c => c.getPages('/blog'));
-
-// Get an entry
-const { data } = useContent(c => c.getEntry('header'));
-
-// Get content with JMESPath query
-const { data } = useContent(c => c.getContent('config.title'));
-
-// Get an image
-const { data } = useContent(c => c.getImage('logo'));
-
-// Get a list
-const { data } = useContent(c => c.getList('categories'));
+const { data } = usePage('/about');      // single page
+const { data } = usePages('/blog');      // all pages under /blog
 ```
 
-#### Returns
+### useSlugs
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `data` | `T \| undefined` | The fetched content |
-| `error` | `unknown` | Error if request failed |
-| `isLoading` | `boolean` | Loading state |
-| `status` | `'idle' \| 'loading' \| 'success' \| 'error'` | Current status |
-| `refetch` | `() => Promise<void>` | Refetch the content |
+Get slugs for dynamic routes:
+
+```tsx
+const { data } = useSlugs('/blog');      // ['post-1', 'post-2']
+```
+
+### useImage / useList / useEntry
+
+```tsx
+const { data } = useImage('logo');       // { url, alt, ... }
+const { data } = useList('categories');  // [{ label, value }, ...]
+const { data } = useEntry('header');     // { heading, body, ... }
+```
+
+## Provider Options
+
+```tsx
+<SleekCMSProvider
+  siteToken="your-site-token"  // required
+  env="staging"                // optional: environment alias
+  cdn={true}                   // optional: use CDN URLs
+  lang="es"                    // optional: language code
+>
+```
 
 ## License
 
