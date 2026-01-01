@@ -91,8 +91,46 @@ const { data } = useEntry('header');     // { heading, body, ... }
   env="staging"                // optional: environment alias
   cdn={true}                   // optional: use CDN URLs
   lang="es"                    // optional: language code
+  cache={localStorage}         // optional: cache adapter
+  cacheMinutes={60}            // optional: cache expiration in minutes
 >
 ```
+
+## Caching
+
+The provider supports custom cache adapters to reduce API calls and improve performance. Any object with `getItem` and `setItem` methods works as a cache adapter.
+
+### Using localStorage
+
+```tsx
+<SleekCMSProvider 
+  siteToken="your-site-token"
+  cache={localStorage}
+  cacheMinutes={60*24}  // Cache expires after 1 day
+>
+  <App />
+</SleekCMSProvider>
+```
+
+### Custom Cache Adapter
+
+```tsx
+import type { SyncCacheAdapter, AsyncCacheAdapter } from '@sleekcms/react';
+
+// Sync adapter
+const myCache: SyncCacheAdapter = {
+  getItem: (key) => localStorage.getItem(key),
+  setItem: (key, value) => localStorage.setItem(key, value),
+};
+
+// Async adapter (e.g., IndexedDB, remote cache)
+const myAsyncCache: AsyncCacheAdapter = {
+  getItem: async (key) => /* ... */,
+  setItem: async (key, value) => /* ... */,
+};
+```
+
+If `cacheMinutes` is not set, cached content never expires.
 
 ## License
 

@@ -1,6 +1,6 @@
 {
   "name": "@sleekcms/react",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "React bindings for @sleekcms/client",
   "main": "index.cjs",
   "module": "index.mjs",
@@ -39,7 +39,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@sleekcms/client": "^2.1.0"
+    "@sleekcms/client": "^2.2.0"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",

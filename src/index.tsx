@@ -1,14 +1,10 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
-import { createAsyncClient, SleekSiteContent, Page, Image, List, Entry } from "@sleekcms/client";
+import { createAsyncClient, SleekSiteContent, Page, Image, List, Entry, ClientOptions, SyncCacheAdapter, AsyncCacheAdapter } from "@sleekcms/client";
 
 type AsyncClient = ReturnType<typeof createAsyncClient>;
 type Pages = SleekSiteContent["pages"];
 
-interface ProviderProps {
-  siteToken: string;
-  env?: string;
-  cdn?: boolean;
-  lang?: string;
+interface ProviderProps extends ClientOptions {
   children: ReactNode;
 }
 
@@ -49,8 +45,8 @@ function useFetch<T>(fetcher: (client: AsyncClient) => Promise<T>, deps: unknown
   return { data, error, loading, refetch };
 }
 
-export function SleekCMSProvider({ siteToken, env, cdn, lang, children }: ProviderProps) {
-  const [client] = useState(() => createAsyncClient({ siteToken, env, cdn, lang }));
+export function SleekCMSProvider({ children, ...options }: ProviderProps) {
+  const [client] = useState(() => createAsyncClient(options));
   return <Context.Provider value={client}>{children}</Context.Provider>;
 }
 
@@ -81,3 +77,5 @@ export function useList(name: string): Result<List | null> {
 export function useEntry(handle: string): Result<Entry | null> {
   return useFetch(client => client.getEntry(handle), [handle]);
 }
+
+export type { ClientOptions, SyncCacheAdapter, AsyncCacheAdapter };
