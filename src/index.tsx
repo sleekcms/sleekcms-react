@@ -56,32 +56,32 @@ export function SleekCMSProvider({ children, ...options }: ProviderProps) {
   return <Context.Provider value={client}>{children}</Context.Provider>;
 }
 
-export function useContent(query?: string, options?: ClientOptions): Result<SleekSiteContent> {
-  return useFetch(client => client.getContent(query), [query], options);
+export function useContent<T = SleekSiteContent>(query?: string, options?: ClientOptions): Result<T> {
+  return useFetch(client => client.getContent(query) as Promise<T>, [query], options);
 }
 
-export function usePages(path: string, options?: ClientOptions): Result<Pages> {
-  return useFetch(client => client.getPages(path), [path], options);
+export function usePages<T = Pages>(path: string, options?: ClientOptions): Result<T> {
+  return useFetch(client => client.getPages(path) as Promise<T>, [path], options);
 }
 
-export function usePage(path: string, options?: ClientOptions): Result<Page | null> {
-  return useFetch(client => client.getPage(path), [path], options);
+export function usePage<T = Page | null>(path: string, options?: ClientOptions): Result<T> {
+  return useFetch(client => client.getPage(path) as Promise<T>, [path], options);
 }
 
-export function useSlugs(path: string, options?: ClientOptions): Result<string[]> {
-  return useFetch(client => client.getSlugs(path), [path], options);
+export function useSlugs<T = string[]>(path: string, options?: ClientOptions): Result<T> {
+  return useFetch(client => client.getSlugs(path) as Promise<T>, [path], options);
 }
 
-export function useImage(name: string, options?: ClientOptions): Result<Image | null> {
-  return useFetch(client => client.getImage(name), [name], options);
+export function useImage<T = Image | null>(name: string, options?: ClientOptions): Result<T> {
+  return useFetch(client => client.getImage(name) as Promise<T>, [name], options);
 }
 
-export function useList(name: string, options?: ClientOptions): Result<List | null> {
-  return useFetch(client => client.getList(name), [name], options);
+export function useList<T = List | null>(name: string, options?: ClientOptions): Result<T> {
+  return useFetch(client => client.getList(name) as Promise<T>, [name], options);
 }
 
-export function useEntry(handle: string, options?: ClientOptions): Result<Entry | null> {
-  return useFetch(client => client.getEntry(handle), [handle], options);
+export function useEntry<T = Entry | null>(handle: string, options?: ClientOptions): Result<T> {
+  return useFetch(client => client.getEntry(handle) as Promise<T>, [handle], options);
 }
 
 export type { ClientOptions, SyncCacheAdapter, AsyncCacheAdapter };
