@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, ReactNode } from "react";
 import { createAsyncClient, SleekSiteContent, Page, Image, List, Entry, ClientOptions, SyncCacheAdapter, AsyncCacheAdapter } from "@sleekcms/client";
 
 type AsyncClient = ReturnType<typeof createAsyncClient>;
@@ -17,14 +17,27 @@ interface Result<T> {
 
 const Context = createContext<AsyncClient | null>(null);
 
+// Serialize options to a stable string for comparison, excluding non-serializable cache
+function getOptionsKey(options?: ClientOptions): string {
+  if (!options) return '';
+  const { cache, ...rest } = options;
+  return JSON.stringify(rest);
+}
+
 function useClient(options?: ClientOptions): AsyncClient {
   const contextClient = useContext(Context);
-  const standaloneClient = useMemo(
-    () => options ? createAsyncClient(options) : null,
-    [options]
-  );
-
-  const client = standaloneClient ?? contextClient;
+  
+  // Use a ref to store the client and only recreate when options actually change
+  const optionsKey = getOptionsKey(options);
+  const clientRef = useRef<AsyncClient | null>(null);
+  const prevOptionsKeyRef = useRef<string>('');
+  
+  if (options && optionsKey !== prevOptionsKeyRef.current) {
+    clientRef.current = createAsyncClient(options);
+    prevOptionsKeyRef.current = optionsKey;
+  }
+  
+  const client = clientRef.current ?? contextClient;
   if (!client) throw new Error("Provide client options or wrap your app with <SleekCMSProvider>");
   return client;
 }
