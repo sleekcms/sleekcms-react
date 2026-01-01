@@ -44,10 +44,23 @@ describe("useContent", () => {
     expect(result.current.error).toBeUndefined();
   });
 
-  it("throws error when used outside provider", () => {
+  it("throws error when used outside provider without options", () => {
     expect(() => renderHook(() => useContent())).toThrow(
-      "Wrap your app with <SleekCMSProvider>"
+      "Provide client options or wrap your app with <SleekCMSProvider>"
     );
+  });
+
+  it("works without provider when options are passed", async () => {
+    const { result } = renderHook(() => useContent(undefined, { siteToken: "test-token" }));
+
+    expect(result.current.loading).toBe(true);
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.data).toEqual(mockContent);
+    expect(result.current.error).toBeUndefined();
   });
 });
 

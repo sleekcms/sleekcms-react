@@ -34,6 +34,22 @@ function About() {
 }
 ```
 
+### Using Hooks Without a Provider
+
+You can also use hooks without wrapping your app in a provider by passing client options directly to the hook:
+
+```tsx
+import { usePage } from '@sleekcms/react';
+
+function About() {
+  const { data, loading } = usePage('/about', { siteToken: 'your-site-token' });
+  if (loading) return <p>Loading...</p>;
+  return <h1>{data?.title}</h1>;
+}
+```
+
+This is useful for one-off fetches or when you can't use a provider.
+
 ## Sync vs Async Client
 
 SleekCMS offers two client types in `@sleekcms/client`:

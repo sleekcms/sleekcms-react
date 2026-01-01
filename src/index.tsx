@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from "react";
 import { createAsyncClient, SleekSiteContent, Page, Image, List, Entry, ClientOptions, SyncCacheAdapter, AsyncCacheAdapter } from "@sleekcms/client";
 
 type AsyncClient = ReturnType<typeof createAsyncClient>;
@@ -17,14 +17,20 @@ interface Result<T> {
 
 const Context = createContext<AsyncClient | null>(null);
 
-function useClient(): AsyncClient {
-  const client = useContext(Context);
-  if (!client) throw new Error("Wrap your app with <SleekCMSProvider>");
+function useClient(options?: ClientOptions): AsyncClient {
+  const contextClient = useContext(Context);
+  const standaloneClient = useMemo(
+    () => options ? createAsyncClient(options) : null,
+    [options]
+  );
+
+  const client = standaloneClient ?? contextClient;
+  if (!client) throw new Error("Provide client options or wrap your app with <SleekCMSProvider>");
   return client;
 }
 
-function useFetch<T>(fetcher: (client: AsyncClient) => Promise<T>, deps: unknown[]): Result<T> {
-  const client = useClient();
+function useFetch<T>(fetcher: (client: AsyncClient) => Promise<T>, deps: unknown[], options?: ClientOptions): Result<T> {
+  const client = useClient(options);
   const [data, setData] = useState<T>();
   const [error, setError] = useState<unknown>();
   const [loading, setLoading] = useState(false);
@@ -50,32 +56,32 @@ export function SleekCMSProvider({ children, ...options }: ProviderProps) {
   return <Context.Provider value={client}>{children}</Context.Provider>;
 }
 
-export function useContent(query?: string): Result<SleekSiteContent> {
-  return useFetch(client => client.getContent(query), [query]);
+export function useContent(query?: string, options?: ClientOptions): Result<SleekSiteContent> {
+  return useFetch(client => client.getContent(query), [query], options);
 }
 
-export function usePages(path: string): Result<Pages> {
-  return useFetch(client => client.getPages(path), [path]);
+export function usePages(path: string, options?: ClientOptions): Result<Pages> {
+  return useFetch(client => client.getPages(path), [path], options);
 }
 
-export function usePage(path: string): Result<Page | null> {
-  return useFetch(client => client.getPage(path), [path]);
+export function usePage(path: string, options?: ClientOptions): Result<Page | null> {
+  return useFetch(client => client.getPage(path), [path], options);
 }
 
-export function useSlugs(path: string): Result<string[]> {
-  return useFetch(client => client.getSlugs(path), [path]);
+export function useSlugs(path: string, options?: ClientOptions): Result<string[]> {
+  return useFetch(client => client.getSlugs(path), [path], options);
 }
 
-export function useImage(name: string): Result<Image | null> {
-  return useFetch(client => client.getImage(name), [name]);
+export function useImage(name: string, options?: ClientOptions): Result<Image | null> {
+  return useFetch(client => client.getImage(name), [name], options);
 }
 
-export function useList(name: string): Result<List | null> {
-  return useFetch(client => client.getList(name), [name]);
+export function useList(name: string, options?: ClientOptions): Result<List | null> {
+  return useFetch(client => client.getList(name), [name], options);
 }
 
-export function useEntry(handle: string): Result<Entry | null> {
-  return useFetch(client => client.getEntry(handle), [handle]);
+export function useEntry(handle: string, options?: ClientOptions): Result<Entry | null> {
+  return useFetch(client => client.getEntry(handle), [handle], options);
 }
 
 export type { ClientOptions, SyncCacheAdapter, AsyncCacheAdapter };
