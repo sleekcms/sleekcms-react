@@ -2,6 +2,8 @@
 
 React hooks for fetching content from [SleekCMS](https://sleekcms.com).
 
+[SleekCMS](https://sleekcms.com) is a hosted headless CMS with a built in static site builder and simple to use API's. Sign in at [sleekcms.com](https://sleekcms.com), create your content models, add your content, then grab your site token and use this library to integrate content in your React app.
+
 ## Installation
 
 ```bash
