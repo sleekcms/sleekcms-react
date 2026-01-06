@@ -4,14 +4,14 @@
 import { describe, it, expect, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { ReactNode } from "react";
-import { SleekCMSProvider, useContent, usePages, usePage, useSlugs, useImage, useList, useEntry } from "./index";
+import { SleekCMSProvider, useContent, usePages, usePage, useSlugs, useImage, useOptions, useEntry } from "./index";
 
 const mockContent = { config: { title: "Test Site" } };
 const mockPages = [{ _path: "/blog/post-1", title: "Post 1" }, { _path: "/blog/post-2", title: "Post 2" }];
 const mockPage = { _path: "/about", title: "About Us" };
 const mockSlugs = ["post-1", "post-2", "post-3"];
 const mockImage = { url: "https://example.com/logo.png", alt: "Logo" };
-const mockList = [{ label: "Tech", value: "tech" }, { label: "News", value: "news" }];
+const mockOptions = [{ label: "Tech", value: "tech" }, { label: "News", value: "news" }];
 const mockEntry = { heading: "Welcome", body: "Hello world" };
 
 vi.mock("@sleekcms/client", () => ({
@@ -21,7 +21,7 @@ vi.mock("@sleekcms/client", () => ({
     getPage: vi.fn().mockResolvedValue(mockPage),
     getSlugs: vi.fn().mockResolvedValue(mockSlugs),
     getImage: vi.fn().mockResolvedValue(mockImage),
-    getList: vi.fn().mockResolvedValue(mockList),
+    getOptions: vi.fn().mockResolvedValue(mockOptions),
     getEntry: vi.fn().mockResolvedValue(mockEntry),
   }),
 }));
@@ -116,15 +116,15 @@ describe("useImage", () => {
   });
 });
 
-describe("useList", () => {
-  it("fetches a list and returns data", async () => {
-    const { result } = renderHook(() => useList("categories"), { wrapper });
+describe("useOptions", () => {
+  it("fetches options and returns data", async () => {
+    const { result } = renderHook(() => useOptions("categories"), { wrapper });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current.data).toEqual(mockList);
+    expect(result.current.data).toEqual(mockOptions);
     expect(result.current.error).toBeUndefined();
   });
 });

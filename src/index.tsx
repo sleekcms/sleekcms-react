@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, ReactNode } from "react";
-import { createAsyncClient, SleekSiteContent, Page, Image, List, Entry, ClientOptions, SyncCacheAdapter, AsyncCacheAdapter } from "@sleekcms/client";
+import { createAsyncClient, SleekSiteContent, Page, Image, Options, Entry, ClientOptions, SyncCacheAdapter, AsyncCacheAdapter } from "@sleekcms/client";
 
 type AsyncClient = ReturnType<typeof createAsyncClient>;
 type Pages = SleekSiteContent["pages"];
@@ -89,8 +89,8 @@ export function useImage<T = Image | null>(name: string, options?: ClientOptions
   return useFetch(client => client.getImage(name) as Promise<T>, [name], options);
 }
 
-export function useList<T = List | null>(name: string, options?: ClientOptions): Result<T> {
-  return useFetch(client => client.getList(name) as Promise<T>, [name], options);
+export function useOptions<T = Options | null>(name: string, options?: ClientOptions): Result<T> {
+  return useFetch(client => client.getOptions(name) as Promise<T>, [name], options);
 }
 
 export function useEntry<T = Entry | null>(handle: string, options?: ClientOptions): Result<T> {
