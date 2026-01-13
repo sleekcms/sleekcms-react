@@ -58,7 +58,7 @@ SleekCMS offers two client types in `@sleekcms/client`:
 
 | Client | Use Case |
 |--------|----------|
-| **Sync** (`createSyncClient`) | Server-side rendering, build-time. Preload content, then access synchronously. |
+| **Sync** (`createSyncClient`) | Server-side rendering, build-time. Prefetch content, then access synchronously. |
 | **Async** (`createAsyncClient`) | Client-side React apps. Fetches on demand, returns Promises. |
 
 **This package (`@sleekcms/react`) uses the async client internally.** The hooks handle fetching, loading states, and refetching automatically—ideal for React SPAs and client components.
@@ -107,7 +107,7 @@ const { data } = useEntry('header');     // { heading, body, ... }
 <SleekCMSProvider
   siteToken="your-site-token"  // required
   env="staging"                // optional: environment alias
-  cdn={true}                   // optional: use CDN URLs
+  resolveEnv={true}            // optional: resolve env to version tag
   lang="es"                    // optional: language code
   cache={localStorage}         // optional: cache adapter
   cacheMinutes={60}            // optional: cache expiration in minutes
