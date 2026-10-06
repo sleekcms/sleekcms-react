@@ -108,7 +108,6 @@ const { data } = useEntry('header');     // { heading, body, ... }
   siteToken="your-site-token"  // required
   env="staging"                // optional: environment alias
   resolveEnv={true}            // optional: resolve env to version tag
-  lang="es"                    // optional: language code
   cache={localStorage}         // optional: cache adapter
   cacheMinutes={60}            // optional: cache expiration in minutes
 >
