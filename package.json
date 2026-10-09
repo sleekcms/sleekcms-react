@@ -1,6 +1,6 @@
 {
   "name": "@sleekcms/react",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "React bindings for @sleekcms/client",
   "main": "index.cjs",
   "module": "index.mjs",
